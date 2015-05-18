@@ -101,7 +101,10 @@ class Plugin_Audit {
             `user_id` bigint(20) NOT NULL,
             `action` varchar(255) NOT NULL,
             `note` text,
+            `plugin_data` text,
+            `old_plugin_data` text,
             `plugin_path` varchar(255) NOT NULL,
+            `wp_version` varchar(255),
             `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id`)
         ) $charset_collate;";

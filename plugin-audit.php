@@ -183,7 +183,7 @@ class Plugin_Audit {
                 'user_id' => $user_ID,
                 'plugin_path' => trim($plugin),
                 'plugin_data' => $data,
-                'old_plugin_data' => $pa_plugins[$plugin],
+                'old_plugin_data' => ($pa_plugins[$plugin] ?: ''),
             );
             if(!in_array($plugin, $pa_plugins_keys)) {
                 $this->log_action(array_merge($common_data, array(

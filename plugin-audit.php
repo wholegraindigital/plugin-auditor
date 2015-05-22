@@ -39,7 +39,7 @@ class Plugin_Audit {
         add_action('admin_init', array($this,'admin_init'));
 
         register_activation_hook(__FILE__, array($this,'activate'));
-        register_deactivation_hook(__FILE__, array($this,'deactivate'));
+        register_uninstall_hook(__FILE__, array('Plugin_Audit','uninstall'));
     }
 
     /*
@@ -49,7 +49,7 @@ class Plugin_Audit {
 
         If not multisite, then we just run pfunction for our single blog.
     */
-    function network_propagate($pfunction, $networkwide) {
+    public static function network_propagate($pfunction, $networkwide) {
         global $wpdb;
 
         if (function_exists('is_multisite') && is_multisite()) {
@@ -74,8 +74,8 @@ class Plugin_Audit {
         $this->network_propagate(array($this, '_activate'), $networkwide);
     }
 
-    function deactivate($networkwide) {
-        $this->network_propagate(array($this, '_deactivate'), $networkwide);
+    public static function uninstall($networkwide) {
+        Plugin_Audit::network_propagate(array('Plugin_Audit', '_uninstall'), $networkwide);
     }
 
     /*
@@ -118,21 +118,11 @@ class Plugin_Audit {
     /*
         Plugin deactivation code here.
     */
-    function _deactivate() {
+    public static function _uninstall() {
         global $wpdb;
         global $pa_db_version;
 
         $table_name = $wpdb->prefix . 'plugin_audit';
-
-        $charset_collate = '';
-
-        if ( ! empty( $wpdb->charset ) ) {
-          $charset_collate = "DEFAULT CHARACTER SET {$wpdb->charset}";
-        }
-
-        if ( ! empty( $wpdb->collate ) ) {
-          $charset_collate .= " COLLATE {$wpdb->collate}";
-        }
 
         $sql = "DROP TABLE $table_name;";
 
@@ -183,8 +173,10 @@ class Plugin_Audit {
                 'user_id' => $user_ID,
                 'plugin_path' => trim($plugin),
                 'plugin_data' => $data,
-                'old_plugin_data' => ($pa_plugins[$plugin] ?: ''),
             );
+            if(isset($pa_plugins[$plugin])) {
+                $common_data['old_plugin_data'] = $pa_plugins[$plugin];
+            }
             if(!in_array($plugin, $pa_plugins_keys)) {
                 $this->log_action(array_merge($common_data, array(
                     'action' => 'installed',

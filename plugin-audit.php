@@ -278,11 +278,11 @@ class Plugin_Audit {
 
         $table_name = $wpdb->prefix . 'plugin_audit';
 
-        if(!is_string($data['plugin_data'])) {
+        if(isset($data['plugin_data']) && !is_string($data['plugin_data'])) {
             $data['plugin_data'] = json_encode($data['plugin_data']);
         }
 
-        if(!is_string($data['old_plugin_data'])) {
+        if(isset($data['old_plugin_data']) && !is_string($data['old_plugin_data'])) {
             $data['old_plugin_data'] = json_encode($data['old_plugin_data']);
         }
 

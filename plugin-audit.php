@@ -181,8 +181,7 @@ class Plugin_Audit {
                 $this->log_action(array_merge($common_data, array(
                     'action' => 'installed',
                 )));
-            }
-            if(in_array($plugin, $active_plugins) && !in_array($plugin, $pa_active_plugins)) {
+            } elseif(in_array($plugin, $active_plugins) && !in_array($plugin, $pa_active_plugins)) {
                 $this->log_action(array_merge($common_data, array(
                     'action' => 'activated',
                 )));

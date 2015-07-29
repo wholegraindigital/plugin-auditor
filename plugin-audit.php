@@ -126,8 +126,7 @@ class Plugin_Audit {
 
         $sql = "DROP TABLE $table_name;";
 
-        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-        dbDelta( $sql );
+        $wpdb->query($sql);
 
         delete_option('pa_db_version');
         delete_option('pa_plugins');

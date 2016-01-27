@@ -3,7 +3,7 @@
 Plugin Name: Plugin Auditor
 Plugin URI: http://www.wholegraindigital.com/
 Description: A plugin that records who and when installed other plugins and also asks the user to add a short comment to explain why they installed it
-Version: 0.1
+Version: 0.2
 Author: Wholegrain Digital
 Author URI: http://www.wholegraindigital.com/
 License: GPL
@@ -158,6 +158,12 @@ class Plugin_Audit {
                     array('%d')
                 );
             }
+        } elseif (isset($_POST['not_now'])) {
+            $wpdb->update( 
+                $table_name,
+                array( 'note' => '<i>Note will be added later</i>' ), 
+                array( 'id' => intval($_POST['log_id']))
+            );
         }
 
         $all_plugins = get_plugins();
@@ -239,15 +245,25 @@ class Plugin_Audit {
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'plugin_audit';
-        $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `note` IS NULL");
+        $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `note` IS NULL AND `action` = \"installed\"");
+
+        $textarea_note = '';
+
+        if (isset($_POST['edit_note'])) {
+            $id_log = $_POST['log_id'];
+            $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `id` = $id_log AND `action` = \"installed\"");
+            $textarea_note = $log->note;
+        }
 
         if($log) {
+            $plugin_data = json_decode($log->plugin_data);
 ?>
+
         <div class="update-nag">
             <form method="post" action="">
                 <input type="hidden" name="log_id" value="<?php echo $log->id ?>">
                 <p>
-                    Plugin "<?php echo $log->plugin_path ?>"
+                    Plugin "<?php echo $plugin_data->Name; ?>"
                     <?php if('version change' == $log->action) { ?>
                     had a version change.
                     <?php } else { ?>
@@ -256,14 +272,12 @@ class Plugin_Audit {
                     <br>
                     Please add a note to explain why you have installed/activated it.
                 </p>
-                <?php if(isset($_POST['note']) && empty($_POST['note'])) { ?>
-                <p style="color: red;">Comment can't be empty!</p>
-                <?php } ?>
                 <p>
-                    <textarea style="width: 100%;" name="note" id="note" cols="30" rows="3" placeholder="add a short comment to explain"></textarea>
+                    <textarea style="width: 100%;" name="note" id="note" cols="30" rows="3" placeholder="add a short comment to explain"><?php echo $textarea_note ?></textarea>
                 </p>
                 <p>
                     <button type="submit" name="save_note" class="button button-primary" style="vertical-align: top;">Save</button>
+                    <button type="submit" name="not_now" class="button button-primary" style="vertical-align: top;">Not Now</button>
                 </p>
             </form>
         </div>

@@ -1,0 +1,9 @@
+@charset 'UTF-8';
+
+.widefat thead tr th:hover {
+	cursor: pointer;
+}
+
+.widefat thead tr th.sorttable_nosort:hover {
+	cursor: default;
+}

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Plugin Auditor
 Plugin URI: http://www.wholegraindigital.com/
-Description: A plugin that records who and when installed other plugins and also asks the user to add a short comment to explain why they installed it
+Description: A plugin that records who installed plugins, when each plugin was installed and also asks the user to add a short comment to explain why they installed it
 Version: 0.2
 Author: Wholegrain Digital
 Author URI: http://www.wholegraindigital.com/
@@ -161,7 +161,7 @@ class Plugin_Audit {
         } elseif (isset($_POST['not_now'])) {
             $wpdb->update( 
                 $table_name,
-                array( 'note' => '<i>Note will be added later</i>' ), 
+                array( 'note' => 'No comment provided' ), 
                 array( 'id' => intval($_POST['log_id']))
             );
         }

@@ -157,7 +157,7 @@ class Plugin_Audit {
                     array('%s'),
                     array('%d')
                 );
-            }
+            };
         } elseif (isset($_POST['not_now'])) {
             $wpdb->update( 
                 $table_name,
@@ -244,7 +244,10 @@ class Plugin_Audit {
     function add_note_nag() {
         global $wpdb;
 
+        $title = __('Plugin Auditor', 'plugin_audit');
+
         $table_name = $wpdb->prefix . 'plugin_audit';
+
         $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `note` IS NULL AND `action` = \"installed\"");
 
         $textarea_note = '';
@@ -260,10 +263,11 @@ class Plugin_Audit {
 ?>
 
         <div class="update-nag">
+        <h1><?php echo esc_html($title); ?></h1>
             <form method="post" action="">
                 <input type="hidden" name="log_id" value="<?php echo $log->id ?>">
                 <p>
-                    Plugin "<?php echo $plugin_data->Name; ?>"
+                    Plugin "<b><?php echo $plugin_data->Name; ?></b>"
                     <?php if('version change' == $log->action) { ?>
                     had a version change.
                     <?php } else { ?>
@@ -273,11 +277,11 @@ class Plugin_Audit {
                     Please add a note to explain why you have installed/activated it.
                 </p>
                 <p>
-                    <textarea style="width: 100%;" name="note" id="note" cols="30" rows="3" placeholder="add a short comment to explain"><?php echo $textarea_note ?></textarea>
+                    <textarea style="width: 100%;" name="note" id="note" cols="30" rows="3" placeholder="add comments here"><?php echo esc_html( $textarea_note ); ?></textarea>
                 </p>
                 <p>
                     <button type="submit" name="save_note" class="button button-primary" style="vertical-align: top;">Save</button>
-                    <button type="submit" name="not_now" class="button button-primary" style="vertical-align: top;">Not Now</button>
+                    <button type="submit" name="not_now" class="button button-secondary" style="vertical-align: top;">Not Now</button>
                 </p>
             </form>
         </div>

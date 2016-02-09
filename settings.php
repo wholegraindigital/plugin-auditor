@@ -32,7 +32,7 @@ class Plugin_Audit_Settings {
             return;
 
         // Add a new submenu to the standard Settings panel
-        $this->pagehook = $page = add_plugins_page(__('Plugin Audit', 'plugin_audit'), __('Audit', 'plugin_audit'), 'administrator', $this->page_id, array($this,'render'));
+        $this->pagehook = $page = add_plugins_page(__('Plugin Auditor', 'plugin_audit'), __('Plugin Auditor', 'plugin_audit'), 'administrator', $this->page_id, array($this,'render'));
 
         // Include js, css, or header *only* for our settings page
         add_action("admin_print_scripts-$page", array($this, 'js_includes'));
@@ -46,8 +46,30 @@ class Plugin_Audit_Settings {
         <style>
             .settings_page_plugin_audit label { display:inline-block; width: 150px; }
         </style>
-        <script src="<?php echo plugins_url(); ?>/plugin-auditor/assets/js/sorttable.js"></script>
-        <link rel="stylesheet" href="<?php echo plugins_url(); ?>/plugin-auditor/assets/css/main.css">
+        <?php 
+
+            // Sort table attributes
+            $handle = 'sortabble';
+            $src = plugins_url() . '/plugin-auditor/assets/js/sorttable.js';
+            $deps = array();
+            $ver = '2.0.0';
+            $in_footer = true;
+
+            // Enqueue JavaScript to sort tables
+            wp_enqueue_script( $handle, $src, $deps, $ver, $in_footer );
+
+            // Plugin styles
+            $handle = 'main';
+            $src = plugins_url() . '/plugin-auditor/assets/css/main.css';
+            $deps = array();
+            $ver = '0.2';
+            $media = 'all';
+
+            // Enqueue CSS to sort tables
+            wp_enqueue_style( $handle, $src, $deps, $ver, $media );
+
+
+         ?>
 <?php
     }
 
@@ -88,8 +110,6 @@ class Plugin_Audit_Settings {
     function render() {
         global $wp_meta_boxes, $wpdb;
 
-        $title = __('Plugin Audit', 'plugin_audit');
-
         $table_name = $wpdb->prefix . 'plugin_audit';
         $logs = $wpdb->get_results("SELECT * FROM $table_name WHERE `action` = \"installed\" ORDER BY `timestamp` DESC ");
 
@@ -108,7 +128,6 @@ class Plugin_Audit_Settings {
         ?>
         
         <div class="wrap">
-            <h2><?php echo esc_html($title); ?></h2>
 
             <table class="sortable wp-list-table widefat fixed posts">
                 <thead>
@@ -122,17 +141,6 @@ class Plugin_Audit_Settings {
                         <th scope="col" class="manage-column sorttable_nosort">Manage Comments</th>
                     </tr>
                 </thead>
-                <tfoot>
-                    <tr>
-                        <th scope="col" class="manage-column">User</th>
-                        <th scope="col" class="manage-column">Action</th>
-                        <th scope="col" class="manage-column">Note</th>
-                        <th scope="col" class="manage-column">Plugin</th>
-                        <th scope="col" class="manage-column">WP Version</th>
-                        <th scope="col" class="manage-column">Timestamp</th>
-                        <th scope="col" class="manage-column sorttable_nosort">Manage Comments</th>
-                    </tr>
-                </tfoot>
                 <tbody id="the-list">
                     <?php
                     foreach($logs as $log) {
@@ -140,7 +148,17 @@ class Plugin_Audit_Settings {
                         $old_plugin_data = json_decode($log->old_plugin_data);
                     ?>
                     <tr id="log-<?php echo $log->id ?>" class="log-<?php echo $log->id ?> type-log action-<?php echo $log->action ?>">
-                        <td><?php $user_info = get_userdata($log->user_id); if($user_info) echo $user_info->user_login ?></td>
+                        <td><?php $user_info = get_userdata($log->user_id); 
+
+                        if($user_info->first_name && $user_info->last_name):
+                            echo $user_info->first_name . ' ' . $user_info->last_name;
+                        elseif ($user_info->first_name && !$user_info->last_name):
+                            echo $user_info->first_name;
+                        else:
+                            echo $user_info->user_login;
+                        endif;
+                        ?></td>
+
                         <td><?php echo $log->action ?></td>
                         <td data-js="note"><?php echo $log->note ?></td>
                         <td>
@@ -155,7 +173,7 @@ class Plugin_Audit_Settings {
                                 <input type="hidden" name="log_id" value="<?php echo $log->id ?>">
                                 <input type="hidden" name="edit_note" value="true">
 
-                                <button type="submit" class="button button-primary" style="vertical-align: top;">
+                                <button type="submit" class="button button-primary add-or-edit-comment" style="vertical-align: top;">
                                 <?php echo __($log->note == NULL ? 'Add comment' : 'Edit comment', 'plugin_audit')
                                 ?>
                                 </button>

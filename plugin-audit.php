@@ -78,8 +78,8 @@ class Plugin_Audit {
         Plugin_Audit::network_propagate(array('Plugin_Audit', '_uninstall'), $networkwide);
     }
 
-    /**
-    * Plugin activation code here.
+    /*
+        Plugin activation code here.
     */
     protected function _activate() {
         global $wpdb;

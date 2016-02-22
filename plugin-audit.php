@@ -78,10 +78,10 @@ class Plugin_Audit {
         Plugin_Audit::network_propagate(array('Plugin_Audit', '_uninstall'), $networkwide);
     }
 
-    /*
-        Plugin activation code here.
+    /**
+    * Plugin activation code here.
     */
-    function _activate() {
+    protected function _activate() {
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'plugin_audit';
@@ -115,8 +115,8 @@ class Plugin_Audit {
         add_option( 'pa_db_version', $this->db_version );
     }
 
-    /*
-        Plugin deactivation code here.
+    /**
+    * Plugin deactivation code here.
     */
     public static function _uninstall() {
         global $wpdb;
@@ -134,14 +134,17 @@ class Plugin_Audit {
     }
 
 
-    /*
-        Load language translation files (if any) for our plugin.
+    /**
+    * Load language translation files (if any) for Plugin Auditor.
     */
-    function init() {
+    public function init() {
         load_plugin_textdomain('plugin_audit', PLUGIN_AUDIT_DIR . 'lang', basename(dirname(__FILE__)) . '/lang');
     }
 
-    function admin_init() {
+    /**
+     * Load the actions that must be done when "save" or "dismiss" are submited and get plugin's data
+     */
+    public function admin_init() {
         global $wpdb;
 
         $user_ID = get_current_user_id();
@@ -247,10 +250,10 @@ class Plugin_Audit {
     }
 
     /**
-     * Add note nag
+     * Add note nag in the top of page where the user can comment about a plugin that was installed
      */
-    function add_note_nag() {
-        global $wpdb, $textarea_note;
+    public function add_note_nag() {
+        global $wpdb;
 
         $title = __('Plugin Auditor', 'plugin_audit');
 
@@ -297,7 +300,10 @@ class Plugin_Audit {
         }
     }
 
-    function log_action($data) {
+    /**
+     * Encode the plugin data and insert in the database
+     */
+    protected function log_action($data) {
         global $wpdb, $wp_version;
 
         $table_name = $wpdb->prefix . 'plugin_audit';

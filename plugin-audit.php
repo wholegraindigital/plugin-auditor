@@ -159,11 +159,19 @@ class Plugin_Audit {
                 );
             };
         } elseif (isset($_POST['not_now'])) {
-            $wpdb->update( 
-                $table_name,
-                array( 'note' => 'No comment provided' ), 
-                array( 'id' => intval($_POST['log_id']))
-            );
+
+            $id_log = intval($_POST['log_id']);
+            $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `id` = $id_log AND `action` = \"installed\"");
+
+            if ($log->note != NULL) {
+                header("Refresh: 0");
+            } else {
+                $wpdb->update( 
+                    $table_name,
+                    array( 'note' => 'No comment provided' ), 
+                    array( 'id' => intval($_POST['log_id']))
+                );
+            }
         }
 
         $all_plugins = get_plugins();
@@ -242,7 +250,7 @@ class Plugin_Audit {
      * Add note nag
      */
     function add_note_nag() {
-        global $wpdb;
+        global $wpdb, $textarea_note;
 
         $title = __('Plugin Auditor', 'plugin_audit');
 

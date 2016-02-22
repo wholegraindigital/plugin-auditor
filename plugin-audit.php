@@ -233,22 +233,6 @@ class Plugin_Audit {
         add_action('network_admin_notices', array($this, 'add_note_nag'), 99);
     }
 
-    /*
-        Redirect to a different page using javascript. More details-
-        http://shibashake.com/wordpress-theme/wordpress-page-redirect
-    */
-    function javascript_redirect($location) {
-        // redirect after header here can't use wp_redirect($location);
-        ?>
-          <script type="text/javascript">
-          <!--
-          window.location= <?php echo "'" . $location . "'"; ?>;
-          //-->
-          </script>
-        <?php
-        exit;
-    }
-
     /**
      * Add note nag in the top of page where the user can comment about a plugin that was installed
      */

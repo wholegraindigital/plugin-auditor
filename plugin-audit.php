@@ -161,21 +161,22 @@ class Plugin_Audit {
                     array('%d')
                 );
             };
-        } elseif (isset($_POST['not_now'])) {
+        } else {
+            if (isset($_POST['not_now'])) {
+                $id_log = intval($_POST['log_id']);
+                $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `id` = $id_log AND `action` = \"installed\"");
 
-            $id_log = intval($_POST['log_id']);
-            $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `id` = $id_log AND `action` = \"installed\"");
-
-            if ($log->note != NULL) {
-                header("Refresh: 0");
-            } else {
-                $wpdb->update( 
-                    $table_name,
-                    array( 'note' => 'No comment provided' ), 
-                    array( 'id' => intval($_POST['log_id']))
-                );
+                if ($log->note != NULL) {
+                    header("Refresh: 0");
+                } else {
+                    $wpdb->update( 
+                        $table_name,
+                        array( 'note' => 'No comment provided' ), 
+                        array( 'id' => intval($_POST['log_id']))
+                    );
+                }
             }
-        }
+        }   
 
         $all_plugins = get_plugins();
         $all_plugins_keys = array_keys($all_plugins);

@@ -167,7 +167,7 @@ class Plugin_Audit {
                 $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `id` = $id_log AND `action` = \"installed\"");
 
                 if ($log->note != NULL) {
-                    header("Refresh: 0");
+                    header("Refresh: 0"); // Refresh the header sent earlier
                 } else {
                     $wpdb->update( 
                         $table_name,

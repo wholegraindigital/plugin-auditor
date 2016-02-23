@@ -167,7 +167,7 @@ class Plugin_Audit {
                 $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `id` = $id_log AND `action` = \"installed\"");
 
                 if ($log->note != NULL) {
-                    header("Refresh: 0"); // Refresh the header sent earlier
+                     // Refresh the header sent earlier
                 } else {
                     $wpdb->update( 
                         $table_name,
@@ -259,7 +259,7 @@ class Plugin_Audit {
 ?>
 
         <div class="update-nag">
-        <h1><?php echo esc_html($title); ?></h1>
+        <h1><?php echo $title; ?></h1>
             <form method="post" action="">
                 <input type="hidden" name="log_id" value="<?php echo $log->id ?>">
                 <p>
@@ -273,7 +273,7 @@ class Plugin_Audit {
                     Please add a note to explain why you have installed/activated it.
                 </p>
                 <p>
-                    <textarea style="width: 100%;" name="note" id="note" cols="30" rows="3" placeholder="add comments here"><?php echo esc_html( $textarea_note ); ?></textarea>
+                    <textarea style="width: 100%;" name="note" id="note" cols="30" rows="3" placeholder="add comments here"><?php echo $textarea_note; ?></textarea>
                 </p>
                 <p>
                     <button type="submit" name="save_note" class="button button-primary" style="vertical-align: top;">Save</button>

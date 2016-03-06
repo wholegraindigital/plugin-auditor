@@ -2,7 +2,7 @@
 /*
 Plugin Name: Plugin Auditor
 Plugin URI: http://www.wholegraindigital.com/
-Description: A plugin that records who and when installed other plugins and also asks the user to add a short comment to explain why they installed it
+Description: A plugin that records who installed plugins, when each plugin was installed and also asks the user to add a short comment to explain why they installed it
 Version: 0.2
 Author: Wholegrain Digital
 Author URI: http://www.wholegraindigital.com/
@@ -81,7 +81,7 @@ class Plugin_Audit {
     /*
         Plugin activation code here.
     */
-    function _activate() {
+    protected function _activate() {
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'plugin_audit';
@@ -115,8 +115,8 @@ class Plugin_Audit {
         add_option( 'pa_db_version', $this->db_version );
     }
 
-    /*
-        Plugin deactivation code here.
+    /**
+    * Plugin deactivation code here.
     */
     public static function _uninstall() {
         global $wpdb;
@@ -134,14 +134,17 @@ class Plugin_Audit {
     }
 
 
-    /*
-        Load language translation files (if any) for our plugin.
+    /**
+    * Load language translation files (if any) for Plugin Auditor.
     */
-    function init() {
+    public function init() {
         load_plugin_textdomain('plugin_audit', PLUGIN_AUDIT_DIR . 'lang', basename(dirname(__FILE__)) . '/lang');
     }
 
-    function admin_init() {
+    /**
+     * Load the actions that must be done when "save" or "dismiss" are submited and get plugin's data
+     */
+    public function admin_init() {
         global $wpdb;
 
         $user_ID = get_current_user_id();
@@ -157,14 +160,23 @@ class Plugin_Audit {
                     array('%s'),
                     array('%d')
                 );
+            };
+        } else {
+            if (isset($_POST['not_now'])) {
+                $id_log = intval($_POST['log_id']);
+                $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `id` = $id_log AND `action` = \"installed\"");
+
+                if ($log->note != NULL) {
+                     // Refresh the header sent earlier
+                } else {
+                    $wpdb->update( 
+                        $table_name,
+                        array( 'note' => 'No comment provided' ), 
+                        array( 'id' => intval($_POST['log_id']))
+                    );
+                }
             }
-        } elseif (isset($_POST['not_now'])) {
-            $wpdb->update( 
-                $table_name,
-                array( 'note' => '<i>Note will be added later</i>' ), 
-                array( 'id' => intval($_POST['log_id']))
-            );
-        }
+        }   
 
         $all_plugins = get_plugins();
         $all_plugins_keys = array_keys($all_plugins);
@@ -222,29 +234,16 @@ class Plugin_Audit {
         add_action('network_admin_notices', array($this, 'add_note_nag'), 99);
     }
 
-    /*
-        Redirect to a different page using javascript. More details-
-        http://shibashake.com/wordpress-theme/wordpress-page-redirect
-    */
-    function javascript_redirect($location) {
-        // redirect after header here can't use wp_redirect($location);
-        ?>
-          <script type="text/javascript">
-          <!--
-          window.location= <?php echo "'" . $location . "'"; ?>;
-          //-->
-          </script>
-        <?php
-        exit;
-    }
-
     /**
-     * Add note nag
+     * Add note nag in the top of page where the user can comment about a plugin that was installed
      */
-    function add_note_nag() {
+    public function add_note_nag() {
         global $wpdb;
 
+        $title = __('Plugin Auditor', 'plugin_audit');
+
         $table_name = $wpdb->prefix . 'plugin_audit';
+
         $log = $wpdb->get_row("SELECT * FROM $table_name WHERE `note` IS NULL AND `action` = \"installed\"");
 
         $textarea_note = '';
@@ -260,10 +259,11 @@ class Plugin_Audit {
 ?>
 
         <div class="update-nag">
+        <h1><?php echo $title; ?></h1>
             <form method="post" action="">
                 <input type="hidden" name="log_id" value="<?php echo $log->id ?>">
                 <p>
-                    Plugin "<?php echo $plugin_data->Name; ?>"
+                    Plugin "<b><?php echo $plugin_data->Name; ?></b>"
                     <?php if('version change' == $log->action) { ?>
                     had a version change.
                     <?php } else { ?>
@@ -273,11 +273,11 @@ class Plugin_Audit {
                     Please add a note to explain why you have installed/activated it.
                 </p>
                 <p>
-                    <textarea style="width: 100%;" name="note" id="note" cols="30" rows="3" placeholder="add a short comment to explain"><?php echo $textarea_note ?></textarea>
+                    <textarea style="width: 100%;" name="note" id="note" cols="30" rows="3" placeholder="add comments here"><?php echo $textarea_note; ?></textarea>
                 </p>
                 <p>
                     <button type="submit" name="save_note" class="button button-primary" style="vertical-align: top;">Save</button>
-                    <button type="submit" name="not_now" class="button button-primary" style="vertical-align: top;">Not Now</button>
+                    <button type="submit" name="not_now" class="button button-secondary" style="vertical-align: top;">Not Now</button>
                 </p>
             </form>
         </div>
@@ -285,7 +285,10 @@ class Plugin_Audit {
         }
     }
 
-    function log_action($data) {
+    /**
+     * Encode the plugin data and insert in the database
+     */
+    protected function log_action($data) {
         global $wpdb, $wp_version;
 
         $table_name = $wpdb->prefix . 'plugin_audit';

@@ -1,8 +1,8 @@
 === Plugin Auditor ===
 Contributors: wholegraindigital, eugenemolari, MatheusFD
 Requires at least: 4.0
-Tested up to: 4.1.1
-Stable tag: 0.1
+Tested up to: 4.4.2
+Stable tag: 0.2
 Tags: plugin audit, audit, security, maintenance, audit trail
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -46,5 +46,11 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
-= 1.0 =
+= 0.1 =
 * Initial version
+
+= 0.2 =
+* Bug fixes
+* Added the possibility to edit older comments
+* Added the possibility to do not comment if the user don't want in that moment
+* Now the user can sort the table information as he wants
